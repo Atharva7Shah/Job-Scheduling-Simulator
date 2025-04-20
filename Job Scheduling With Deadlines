@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Scheduling Simulator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Base Styles */
+    :root {
+      --primary-color: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary-color: #f97316;
+      --background-color: papayawhip;
+      --text-color: #1e293b;
+      --light-text: #64748b;
+      --border-color: #e2e8f0;
+      --card-bg: #ffffff;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Header & Navigation */
+    header {
+      background-color: var(--card-bg);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo i {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+
+    .logo h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 1.5rem;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: var(--text-color);
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      transition: var(--transition);
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--primary-color);
+      background-color: rgba(99, 102, 241, 0.1);
+    }
+
+    /* Main Content */
+    main {
+      min-height: calc(100vh - 140px);
+    }
+
+    .section {
+      display: none;
+      padding: 2rem 0;
+    }
+
+    .section.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Algorithm Section */
+    .algorithm-intro,
+    .algorithm-steps,
+    .algorithm-example,
+    .algorithm-complexity,
+    .algorithm-pseudocode {
+      background-color: var(--card-bg);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary-dark);
+    }
+
+    h3 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+    }
+
+    h4 {
+      font-size: 1.2rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-color);
+    }
+
+    p,
+    li {
+      margin-bottom: 0.75rem;
+    }
+
+    ul,
+    ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .code-block {
+      background-color: #f8f9fa;
+      border-radius: 0.25rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+
+    pre {
+      font-family: "Courier New", Courier, monospace;
+      white-space: pre-wrap;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    th,
+    td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+    }
+
+    .example-steps {
+      background-color: #f8f9fa;
+      border-radius: 0.25rem;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    /* Simulator Section */
+    .simulator-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .input-section,
+    .output-section {
+      background-color: var(--card-bg);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.25rem;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.25rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .add-job {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .add-job:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .simulate {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    .simulate:hover {
+      background-color: #ea580c;
+    }
+
+    .clear {
+      background-color: #ef4444;
+      color: white;
+    }
+
+    .clear:hover {
+      background-color: #dc2626;
+    }
+
+    .sample {
+      background-color: #10b981;
+      color: white;
+    }
+
+    .sample:hover {
+      background-color: #059669;
+    }
+
+    .job-list-container {
+      margin-top: 2rem;
+    }
+
+    .buttons-container {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .delete-job {
+      background-color: #ef4444;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .results-summary {
+      background-color: #f8f9fa;
+      border-radius: 0.25rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .total-profit {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .gantt-chart-container {
+      margin-bottom: 1.5rem;
+    }
+
+    #gantt-chart {
+      background-color: #f8f9fa;
+      border-radius: 0.25rem;
+      padding: 1rem;
+      min-height: 150px;
+    }
+
+    .step-by-step {
+      margin-bottom: 1.5rem;
+    }
+
+    #execution-steps {
+      background-color: #f8f9fa;
+      border-radius: 0.25rem;
+      padding: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .step {
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .step:last-child {
+      border-bottom: none;
+    }
+
+    .job-block {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      margin: 0.25rem;
+      border-radius: 0.25rem;
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+    }
+
+    .timeline {
+      display: flex;
+      margin-top: 1rem;
+      position: relative;
+      height: 80px;
+    }
+
+    .time-slot {
+      flex: 1;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .time-slot-label {
+      position: absolute;
+      bottom: -25px;
+      font-size: 0.8rem;
+    }
+
+    .job-slot {
+      width: 100%;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 500;
+    }
+
+    .empty-slot {
+      background-color: #e5e7eb;
+      color: var(--light-text);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background-color: var(--card-bg);
+      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    footer i {
+      color: #ef4444;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .simulator-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .nav-links {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      h3 {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .nav-links {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .nav-link {
+        width: 100%;
+        text-align: center;
+      }
+
+      .buttons-container {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">
+        <i class="fas fa-tasks"></i>
+        <h1>Job Scheduling Simulator</h1>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#algorithm" class="nav-link active">Algorithm</a></li>
+        <li><a href="#simulator" class="nav-link">Simulator</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="algorithm" class="section active">
+      <div class="container">
+        <h2>Job Sequencing with Deadlines: A Greedy Approach</h2>
+        
+        <div class="algorithm-intro">
+          <p>The Job Sequencing Problem is a classic optimization problem in computer science where:</p>
+          <ul>
+            <li>We have a set of jobs, each with a deadline and profit.</li>
+            <li>Each job takes exactly one unit of time to complete.</li>
+            <li>Only one job can be scheduled at a time.</li>
+            <li>The goal is to maximize the total profit by scheduling jobs within their deadlines.</li>
+          </ul>
+        </div>
+
+        <div class="algorithm-steps">
+          <h3>Algorithm Steps</h3>
+          <ol>
+            <li>
+              <strong>Sort jobs</strong> in decreasing order of profit.
+              <div class="code-block">
+                <pre>Sort jobs[] in decreasing order of profit</pre>
+              </div>
+            </li>
+            <li>
+              <strong>Initialize result sequence</strong> with first job.
+              <div class="code-block">
+                <pre>Initialize result[] array to store the sequence of jobs</pre>
+              </div>
+            </li>
+            <li>
+              <strong>Iterate through remaining jobs</strong> and place each job in the latest possible slot before its deadline.
+              <div class="code-block">
+                <pre>
+for each job in sorted jobs:
+  Find the latest free time slot before deadline
+  If found, place the job in that slot</pre>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="algorithm-example">
+          <h3>Example</h3>
+          <p>Consider the following jobs with their deadlines and profits:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Job ID</th>
+                <th>Deadline</th>
+                <th>Profit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>J1</td>
+                <td>2</td>
+                <td>100</td>
+              </tr>
+              <tr>
+                <td>J2</td>
+                <td>1</td>
+                <td>50</td>
+              </tr>
+              <tr>
+                <td>J3</td>
+                <td>2</td>
+                <td>20</td>
+              </tr>
+              <tr>
+                <td>J4</td>
+                <td>1</td>
+                <td>30</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="example-steps">
+            <p><strong>Step 1:</strong> Sort jobs by profit: J1(100), J2(50), J4(30), J3(20)</p>
+            <p><strong>Step 2:</strong> Process J1: Place in slot 2</p>
+            <p><strong>Step 3:</strong> Process J2: Place in slot 1</p>
+            <p><strong>Step 4:</strong> Process J4: No available slot before deadline</p>
+            <p><strong>Step 5:</strong> Process J3: No available slot before deadline</p>
+            <p><strong>Result:</strong> Schedule jobs J2, J1 for a total profit of 150</p>
+          </div>
+        </div>
+
+        <div class="algorithm-complexity">
+          <h3>Time Complexity</h3>
+          <p>The time complexity of this algorithm is <strong>O(n log n)</strong>, which breaks down as follows:</p>
+          <ul>
+            <li>Sorting the jobs takes O(n log n) time.</li>
+            <li>Finding the appropriate slot for each job takes O(n) time in a naive implementation.</li>
+            <li>With efficient data structures like Disjoint Set Union, the slot finding can be optimized.</li>
+          </ul>
+          <p>The overall time complexity is dominated by the sorting step, making it O(n log n).</p>
+        </div>
+
+        <div class="algorithm-pseudocode">
+          <h3>Pseudocode</h3>
+          <div class="code-block">
+            <pre>
+Algorithm JobSequencing(jobs[], n):
+  Sort jobs[] in decreasing order of profit
+  
+  // Find the maximum deadline
+  maxDeadline = maximum deadline in jobs[]
+  
+  // Initialize result array and slot array
+  result[maxDeadline] = {0}  // Initialize with 0 (no job)
+  slot[maxDeadline] = {false}  // Initialize all slots as free
+  
+  // Fill the result array
+  for i = 0 to n-1:
+    // Find a free slot for this job
+    for j = min(maxDeadline, jobs[i].deadline) - 1 down to 0:
+      if slot[j] is false:
+        result[j] = i  // Add job to result
+        slot[j] = true  // Mark slot as filled
+        break
+  
+  // Print the result
+  for i = 0 to maxDeadline-1:
+    if slot[i]:
+      print jobs[result[i]].id
+</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="simulator" class="section">
+      <div class="container">
+        <h2>Job Scheduling Simulator</h2>
+        
+        <div class="simulator-container">
+          <div class="input-section">
+            <h3>Input Jobs</h3>
+            <form id="job-form">
+              <div class="form-group">
+                <label for="job-id">Job ID:</label>
+                <input type="text" id="job-id" placeholder="e.g., J1" required>
+              </div>
+              <div class="form-group">
+                <label for="deadline">Deadline:</label>
+                <input type="number" id="deadline" min="1" placeholder="e.g., 2" required>
+              </div>
+              <div class="form-group">
+                <label for="profit">Profit:</label>
+                <input type="number" id="profit" min="1" placeholder="e.g., 100" required>
+              </div>
+              <button type="submit" class="btn add-job">Add Job</button>
+            </form>
+            
+            <div class="job-list-container">
+              <h3>Job List</h3>
+              <table id="job-table">
+                <thead>
+                  <tr>
+                    <th>Job ID</th>
+                    <th>Deadline</th>
+                    <th>Profit</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="job-list">
+                  <!-- Jobs will be added here dynamically -->
+                </tbody>
+              </table>
+              <div class="buttons-container">
+                <button id="run-simulation" class="btn simulate">Run Simulation</button>
+                <button id="clear-jobs" class="btn clear">Clear All</button>
+                <button id="add-sample-jobs" class="btn sample">Add Sample Jobs</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="output-section">
+            <h3>Simulation Results</h3>
+            <div id="results-container" class="hidden">
+              <div class="results-summary">
+                <h4>Optimal Job Sequence</h4>
+                <div id="optimal-sequence"></div>
+                <div class="total-profit">
+                  <span>Total Profit:</span>
+                  <span id="total-profit">0</span>
+                </div>
+              </div>
+              
+              <div class="gantt-chart-container">
+                <h4>Gantt Chart</h4>
+                <div id="gantt-chart"></div>
+              </div>
+              
+              <div class="step-by-step">
+                <h4>Step-by-Step Execution</h4>
+                <div id="execution-steps"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Job Scheduling Simulator | Created with <i class="fas fa-heart"></i> by v0</p>
+  </footer>
+
+  <script>
+    // Wait for the DOM to be fully loaded
+    document.addEventListener("DOMContentLoaded", () => {
+      // Navigation functionality
+      const navLinks = document.querySelectorAll(".nav-link")
+      const sections = document.querySelectorAll(".section")
+
+      navLinks.forEach((link) => {
+        link.addEventListener("click", function (e) {
+          e.preventDefault()
+
+          // Remove active class from all links and sections
+          navLinks.forEach((link) => link.classList.remove("active"))
+          sections.forEach((section) => section.classList.remove("active"))
+
+          // Add active class to clicked link
+          this.classList.add("active")
+
+          // Get the target section and make it active
+          const targetId = this.getAttribute("href").substring(1)
+          document.getElementById(targetId).classList.add("active")
+        })
+      })
+
+      // Job management
+      const jobForm = document.getElementById("job-form")
+      const jobList = document.getElementById("job-list")
+      const runSimulationBtn = document.getElementById("run-simulation")
+      const clearJobsBtn = document.getElementById("clear-jobs")
+      const addSampleJobsBtn = document.getElementById("add-sample-jobs")
+      const resultsContainer = document.getElementById("results-container")
+      const optimalSequence = document.getElementById("optimal-sequence")
+      const totalProfit = document.getElementById("total-profit")
+      const ganttChart = document.getElementById("gantt-chart")
+      const executionSteps = document.getElementById("execution-steps")
+
+      // Array to store jobs
+      let jobs = []
+
+      // Add a new job
+      jobForm.addEventListener("submit", (e) => {
+        e.preventDefault()
+
+        const jobId = document.getElementById("job-id").value
+        const deadline = Number.parseInt(document.getElementById("deadline").value)
+        const profit = Number.parseInt(document.getElementById("profit").value)
+
+        // Check if job ID already exists
+        if (jobs.some((job) => job.id === jobId)) {
+          alert("Job ID already exists. Please use a unique ID.")
+          return
+        }
+
+        // Add job to array
+        jobs.push({
+          id: jobId,
+          deadline: deadline,
+          profit: profit,
+        })
+
+        // Update job list
+        updateJobList()
+
+        // Clear form
+        jobForm.reset()
+        document.getElementById("job-id").focus()
+      })
+
+      // Update job list in the table
+      function updateJobList() {
+        jobList.innerHTML = ""
+
+        jobs.forEach((job, index) => {
+          const row = document.createElement("tr")
+
+          row.innerHTML = `
+            <td>${job.id}</td>
+            <td>${job.deadline}</td>
+            <td>${job.profit}</td>
+            <td><button class="delete-job" data-index="${index}">Delete</button></td>
+          `
+
+          jobList.appendChild(row)
+        })
+
+        // Add event listeners to delete buttons
+        document.querySelectorAll(".delete-job").forEach((button) => {
+          button.addEventListener("click", function () {
+            const index = Number.parseInt(this.getAttribute("data-index"))
+            jobs.splice(index, 1)
+            updateJobList()
+          })
+        })
+      }
+
+      // Clear all jobs
+      clearJobsBtn.addEventListener("click", () => {
+        jobs = []
+        updateJobList()
+        resultsContainer.classList.add("hidden")
+      })
+
+      // Add sample jobs
+      addSampleJobsBtn.addEventListener("click", () => {
+        jobs = [
+          { id: "J1", deadline: 2, profit: 100 },
+          { id: "J2", deadline: 1, profit: 50 },
+          { id: "J3", deadline: 2, profit: 20 },
+          { id: "J4", deadline: 1, profit: 30 },
+          { id: "J5", deadline: 3, profit: 80 },
+        ]
+        updateJobList()
+      })
+
+      // Run simulation
+      runSimulationBtn.addEventListener("click", () => {
+        if (jobs.length === 0) {
+          alert("Please add at least one job before running the simulation.")
+          return
+        }
+
+        // Run the job sequencing algorithm
+        const result = jobSequencing(jobs)
+
+        // Display results
+        displayResults(result)
+      })
+
+      // Job sequencing algorithm
+      function jobSequencing(jobs) {
+        // Create a copy of jobs to avoid modifying the original array
+        const jobsCopy = [...jobs]
+
+        // Sort jobs by profit in descending order
+        jobsCopy.sort((a, b) => b.profit - a.profit)
+
+        // Find the maximum deadline
+        const maxDeadline = Math.max(...jobsCopy.map((job) => job.deadline))
+
+        // Initialize result array and slot array
+        const result = Array(maxDeadline).fill(null)
+        const slot = Array(maxDeadline).fill(false)
+
+        // Initialize steps array to track algorithm execution
+        const steps = []
+
+        // Process each job
+        jobsCopy.forEach((job) => {
+          // Find a free slot for this job
+          for (let j = Math.min(maxDeadline, job.deadline) - 1; j >= 0; j--) {
+            if (!slot[j]) {
+              result[j] = job
+              slot[j] = true
+
+              // Add step to steps array
+              steps.push({
+                job: job,
+                slot: j + 1,
+                action: "placed",
+                message: Job ${job.id} with profit ${job.profit} is placed at slot ${j + 1},
+              })
+
+              break
+            }
+          }
+
+          // If no slot was found
+          if (!steps.some((step) => step.job.id === job.id)) {
+            steps.push({
+              job: job,
+              action: "rejected",
+              message: Job ${job.id} with profit ${job.profit} cannot be scheduled (no available slot before deadline ${job.deadline}),
+            })
+          }
+        })
+
+        // Filter out null values from result
+        const scheduledJobs = result.filter((job) => job !== null)
+
+        // Calculate total profit
+        const totalProfit = scheduledJobs.reduce((sum, job) => sum + job.profit, 0)
+
+        return {
+          scheduledJobs: scheduledJobs,
+          totalProfit: totalProfit,
+          steps: steps,
+          maxDeadline: maxDeadline,
+        }
+      }
+
+      // Display results
+      function displayResults(result) {
+        // Show results container
+        resultsContainer.classList.remove("hidden")
+
+        // Display optimal sequence
+        optimalSequence.innerHTML = ""
+        result.scheduledJobs.forEach((job) => {
+          const jobBlock = document.createElement("div")
+          jobBlock.className = "job-block"
+          jobBlock.textContent = job.id
+          optimalSequence.appendChild(jobBlock)
+        })
+
+        // Display total profit
+        totalProfit.textContent = result.totalProfit
+
+        // Display Gantt chart
+        displayGanttChart(result)
+
+        // Display execution steps
+        displayExecutionSteps(result.steps)
+
+        // Scroll to results
+        resultsContainer.scrollIntoView({ behavior: "smooth" })
+      }
+
+      // Display Gantt chart
+      function displayGanttChart(result) {
+        ganttChart.innerHTML = ""
+
+        // Create timeline container
+        const timeline = document.createElement("div")
+        timeline.className = "timeline"
+
+        // Create time slots
+        for (let i = 0; i < result.maxDeadline; i++) {
+          const timeSlot = document.createElement("div")
+          timeSlot.className = "time-slot"
+
+          const job = result.scheduledJobs.find((job, index) => index === i)
+
+          // Create job slot
+          const jobSlot = document.createElement("div")
+          jobSlot.className = "job-slot"
+
+          if (job) {
+            jobSlot.textContent = ${job.id} (${job.profit})
+            jobSlot.style.backgroundColor = getRandomColor(job.id)
+          } else {
+            jobSlot.textContent = "Empty"
+            jobSlot.classList.add("empty-slot")
+          }
+
+          // Create time slot label
+          const timeSlotLabel = document.createElement("div")
+          timeSlotLabel.className = "time-slot-label"
+          timeSlotLabel.textContent = Slot ${i + 1}
+
+          timeSlot.appendChild(jobSlot)
+          timeSlot.appendChild(timeSlotLabel)
+          timeline.appendChild(timeSlot)
+        }
+
+        ganttChart.appendChild(timeline)
+      }
+
+      // Display execution steps
+      function displayExecutionSteps(steps) {
+        executionSteps.innerHTML = ""
+
+        steps.forEach((step, index) => {
+          const stepElement = document.createElement("div")
+          stepElement.className = "step"
+
+          stepElement.innerHTML = `
+            <strong>Step ${index + 1}:</strong> ${step.message}
+          `
+
+          executionSteps.appendChild(stepElement)
+        })
+      }
+
+      // Generate a random color based on job ID (consistent for the same ID)
+      function getRandomColor(jobId) {
+        // Simple hash function to convert job ID to a number
+        let hash = 0
+        for (let i = 0; i < jobId.length; i++) {
+          hash = jobId.charCodeAt(i) + ((hash << 5) - hash)
+        }
+
+        // Convert to RGB color
+        const r = (hash & 0xff0000) >> 16
+        const g = (hash & 0x00ff00) >> 8
+        const b = hash & 0x0000ff
+
+        return rgb(${r}, ${g}, ${b})
+      }
+    })
+  </script>
+</body>
+</html>
